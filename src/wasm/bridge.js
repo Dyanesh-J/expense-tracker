@@ -107,6 +107,73 @@ function saveStoredGoals(arr) {
   localStorage.setItem(GOALS_KEY, JSON.stringify(arr));
 }
 
+function formatDate(date) {
+  return `${String(date.getDate()).padStart(2, '0')}-${String(date.getMonth() + 1).padStart(2, '0')}-${date.getFullYear()}`;
+}
+
+function formatMonth(date) {
+  return `${String(date.getMonth() + 1).padStart(2, '0')}-${date.getFullYear()}`;
+}
+
+function addDays(date, days) {
+  const next = new Date(date);
+  next.setDate(next.getDate() + days);
+  return next;
+}
+
+function buildPresentationSeed() {
+  const today = new Date();
+  const currentMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+  const previousMonth = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+  const twoMonthsAgo = new Date(today.getFullYear(), today.getMonth() - 2, 1);
+
+  return {
+    budgets: {
+      [formatMonth(twoMonthsAgo)]: 18000,
+      [formatMonth(previousMonth)]: 22000,
+      [formatMonth(currentMonth)]: 24000
+    },
+    expenses: [
+      { date: formatDate(addDays(twoMonthsAgo, 1)), category: 'Food', amount: 420, note: 'Breakfast and groceries' },
+      { date: formatDate(addDays(twoMonthsAgo, 3)), category: 'Transport', amount: 310, note: 'Cab to client office' },
+      { date: formatDate(addDays(twoMonthsAgo, 5)), category: 'Shopping', amount: 1850, note: 'Office shirt and shoes' },
+      { date: formatDate(addDays(twoMonthsAgo, 7)), category: 'Bills', amount: 2400, note: 'Electricity and Wi-Fi' },
+      { date: formatDate(addDays(twoMonthsAgo, 10)), category: 'Entertainment', amount: 799, note: 'Weekend movie and snacks' },
+      { date: formatDate(addDays(twoMonthsAgo, 14)), category: 'Health', amount: 650, note: 'Doctor consultation' },
+      { date: formatDate(addDays(twoMonthsAgo, 18)), category: 'Education', amount: 1299, note: 'React course subscription' },
+      { date: formatDate(addDays(twoMonthsAgo, 22)), category: 'Travel', amount: 4200, note: 'Short getaway booking' },
+      { date: formatDate(addDays(twoMonthsAgo, 25)), category: 'Other', amount: 500, note: 'Miscellaneous purchases' },
+
+      { date: formatDate(addDays(previousMonth, 1)), category: 'Food', amount: 550, note: 'Supermarket refill' },
+      { date: formatDate(addDays(previousMonth, 4)), category: 'Transport', amount: 260, note: 'Fuel top-up' },
+      { date: formatDate(addDays(previousMonth, 6)), category: 'Shopping', amount: 2400, note: 'Bluetooth headphones' },
+      { date: formatDate(addDays(previousMonth, 9)), category: 'Bills', amount: 3100, note: 'Rent utilities split' },
+      { date: formatDate(addDays(previousMonth, 12)), category: 'Entertainment', amount: 999, note: 'Concert ticket' },
+      { date: formatDate(addDays(previousMonth, 15)), category: 'Health', amount: 480, note: 'Medicines' },
+      { date: formatDate(addDays(previousMonth, 18)), category: 'Education', amount: 1599, note: 'Cloud certification prep' },
+      { date: formatDate(addDays(previousMonth, 20)), category: 'Travel', amount: 5200, note: 'Train and hotel advance' },
+      { date: formatDate(addDays(previousMonth, 24)), category: 'Food', amount: 680, note: 'Dinner with friends' },
+      { date: formatDate(addDays(previousMonth, 27)), category: 'Other', amount: 750, note: 'Gift wrap and accessories' },
+
+      { date: formatDate(addDays(currentMonth, 1)), category: 'Food', amount: 480, note: 'Groceries and fruits' },
+      { date: formatDate(addDays(currentMonth, 2)), category: 'Transport', amount: 290, note: 'Metro recharge' },
+      { date: formatDate(addDays(currentMonth, 4)), category: 'Shopping', amount: 3400, note: 'Presentation outfit' },
+      { date: formatDate(addDays(currentMonth, 6)), category: 'Bills', amount: 4200, note: 'Laptop EMI and broadband' },
+      { date: formatDate(addDays(currentMonth, 8)), category: 'Entertainment', amount: 850, note: 'Streaming and outing' },
+      { date: formatDate(addDays(currentMonth, 10)), category: 'Health', amount: 950, note: 'Dental cleaning' },
+      { date: formatDate(addDays(currentMonth, 13)), category: 'Education', amount: 2100, note: 'DSA bootcamp fee' },
+      { date: formatDate(addDays(currentMonth, 16)), category: 'Travel', amount: 6800, note: 'Conference trip booking' },
+      { date: formatDate(addDays(currentMonth, 20)), category: 'Food', amount: 720, note: 'Team lunch' },
+      { date: formatDate(addDays(currentMonth, 23)), category: 'Other', amount: 1100, note: 'Power bank and cables' }
+    ],
+    goals: [
+      { name: 'Buy New Laptop', targetAmount: 90000, savedAmount: 62000, etaDays: 75, createdDate: formatDate(addDays(today, -20)) },
+      { name: 'Upgrade Phone', targetAmount: 45000, savedAmount: 45000, etaDays: 45, createdDate: formatDate(addDays(today, -60)) },
+      { name: 'Weekend Bike Fund', targetAmount: 150000, savedAmount: 38000, etaDays: 180, createdDate: formatDate(addDays(today, -10)) }
+    ]
+  };
+}
+
 const VALID_CATEGORIES = ['Food','Transport','Shopping','Entertainment','Health','Bills','Education','Travel','Other'];
 
 function monthFromDate(date) {
@@ -354,6 +421,34 @@ export const tracker = {
     goals.splice(idx, 1);
     saveStoredGoals(goals);
     return { success: true };
+  },
+
+  clearAllData() {
+    saveStoredExpenses([]);
+    saveStoredBudgets({});
+    saveStoredGoals([]);
+    return { success: true };
+  },
+
+  seedPresentationData(force = false) {
+    const hasData = getStoredExpenses().length || Object.keys(getStoredBudgets()).length || getStoredGoals().length;
+    if (hasData && !force) {
+      return { success: true, seeded: false };
+    }
+
+    this.clearAllData();
+    const seed = buildPresentationSeed();
+    seed.expenses.forEach((expense) => {
+      this.addExpense(expense.date, expense.category, expense.amount, expense.note);
+    });
+    Object.entries(seed.budgets).forEach(([month, budget]) => {
+      this.setBudget(month, budget);
+    });
+    seed.goals.forEach((goal) => {
+      this.addGoal(goal.name, goal.targetAmount, goal.etaDays, goal.createdDate, goal.savedAmount);
+    });
+
+    return { success: true, seeded: true };
   },
 
   // Dashboard stats

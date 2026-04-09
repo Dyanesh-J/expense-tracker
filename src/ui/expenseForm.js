@@ -1,7 +1,7 @@
 // src/ui/expenseForm.js
 import { tracker } from '../wasm/bridge.js';
 import { showToast } from './toast.js';
-import { getCurrentDate } from '../utils/helpers.js';
+import { formatCurrency, getCurrentDate } from '../utils/helpers.js';
 
 export function renderExpenseForm(expense = null, onSave = null) {
   const isEdit = !!expense;
@@ -85,6 +85,11 @@ export function renderExpenseForm(expense = null, onSave = null) {
 
     if (result.success) {
       showToast(isEdit ? 'Expense updated!' : 'Expense added!', 'success');
+      const monthKey = date.substring(3);
+      const monthly = tracker.getMonthlyTotal(monthKey);
+      if (monthly.budget > 0 && monthly.total > monthly.budget) {
+        showToast(`Budget limit warning: exceeded by ${formatCurrency(monthly.total - monthly.budget)}`, 'warning');
+      }
       closeModal();
       if (onSave) onSave();
     } else {

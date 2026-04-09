@@ -177,7 +177,7 @@ function bindEvents(container) {
   });
 
   container.querySelector('#import-sample-btn').addEventListener('click', () => {
-    importSampleData();
+    tracker.seedPresentationData(true);
     showToast('Sample data loaded!', 'success');
     loadSettings(container);
   });
@@ -198,37 +198,10 @@ function bindEvents(container) {
     `);
 
     document.getElementById('confirm-clear').addEventListener('click', () => {
-      localStorage.removeItem('mmc_expenses');
-      localStorage.removeItem('mmc_budgets');
+      tracker.clearAllData();
       closeModal();
       showToast('All data cleared', 'info');
       loadSettings(container);
     });
   });
-}
-
-function importSampleData() {
-  const now = new Date();
-  const mm = String(now.getMonth() + 1).padStart(2, '0');
-  const yyyy = now.getFullYear();
-
-  const samples = [
-    { date: `01-${mm}-${yyyy}`, category: 'Food', amount: 450, note: 'Groceries from DMart' },
-    { date: `02-${mm}-${yyyy}`, category: 'Transport', amount: 220, note: 'Uber to office' },
-    { date: `05-${mm}-${yyyy}`, category: 'Food', amount: 180, note: 'Lunch with team' },
-    { date: `08-${mm}-${yyyy}`, category: 'Shopping', amount: 1200, note: 'New headphones' },
-    { date: `10-${mm}-${yyyy}`, category: 'Bills', amount: 650, note: 'Electricity bill' },
-    { date: `12-${mm}-${yyyy}`, category: 'Health', amount: 380, note: 'Pharmacy' },
-    { date: `14-${mm}-${yyyy}`, category: 'Entertainment', amount: 299, note: 'Netflix subscription' },
-    { date: `15-${mm}-${yyyy}`, category: 'Food', amount: 320, note: 'Swiggy order' },
-    { date: `18-${mm}-${yyyy}`, category: 'Education', amount: 999, note: 'Udemy course' },
-    { date: `20-${mm}-${yyyy}`, category: 'Transport', amount: 150, note: 'Metro card recharge' },
-    { date: `22-${mm}-${yyyy}`, category: 'Travel', amount: 2500, note: 'Weekend trip to Pondicherry' },
-    { date: `25-${mm}-${yyyy}`, category: 'Food', amount: 500, note: 'Birthday dinner' },
-    { date: `28-${mm}-${yyyy}`, category: 'Bills', amount: 300, note: 'Internet bill' },
-    { date: `30-${mm}-${yyyy}`, category: 'Shopping', amount: 800, note: 'Clothes' }
-  ];
-
-  samples.forEach((sample) => tracker.addExpense(sample.date, sample.category, sample.amount, sample.note));
-  tracker.setBudget(`${mm}-${yyyy}`, 10000);
 }

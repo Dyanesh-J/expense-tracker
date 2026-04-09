@@ -81,6 +81,7 @@ async function init() {
   bindShellEvents();
 
   currentUser = getStoredSession();
+  ensurePresentationData();
   updateSidebarUser();
 
   setTimeout(() => {
@@ -468,6 +469,7 @@ function handleSignInSubmit(event) {
 
   currentUser = user;
   saveStoredSession(user);
+  ensurePresentationData();
   updateSidebarUser();
   showToast(`Welcome back, ${user.name}!`, 'success');
   navigateTo('dashboard', false);
@@ -501,6 +503,14 @@ function updateSidebarUser() {
   sidebarUser?.classList.remove('hidden');
   sidebarUserName.textContent = currentUser.name || currentUser.username;
   sidebarUserEmail.textContent = currentUser.email;
+}
+
+function ensurePresentationData() {
+  if (!currentUser) return;
+  const result = tracker.seedPresentationData(false);
+  if (result?.seeded) {
+    showToast('Presentation data loaded automatically.', 'info');
+  }
 }
 
 function initializeSidebarCalendar() {
