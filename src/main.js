@@ -230,14 +230,18 @@ function renderAuthPage(mode = 'signin', status = null) {
 
   pageContainer.innerHTML = buildAuthMarkup(normalizedMode, status);
 
-  pageContainer.querySelector('[data-auth-switch="signin"]')?.addEventListener('click', (event) => {
-    event.preventDefault();
-    renderAuthPage('signin');
+  pageContainer.querySelectorAll('[data-auth-switch="signin"]').forEach((element) => {
+    element.addEventListener('click', (event) => {
+      event.preventDefault();
+      renderAuthPage('signin');
+    });
   });
 
-  pageContainer.querySelector('[data-auth-switch="register"]')?.addEventListener('click', (event) => {
-    event.preventDefault();
-    renderAuthPage('register');
+  pageContainer.querySelectorAll('[data-auth-switch="register"]').forEach((element) => {
+    element.addEventListener('click', (event) => {
+      event.preventDefault();
+      renderAuthPage('register');
+    });
   });
 
   pageContainer.querySelector('#signin-form')?.addEventListener('submit', handleSignInSubmit);
@@ -263,7 +267,7 @@ function buildAuthMarkup(mode, status) {
           <p class="auth-subtitle">Your account is saved on this device. Use the button below to go back and sign in.</p>
           ${statusMarkup}
           <div class="auth-actions">
-            <button class="btn btn-primary" data-auth-switch="signin">Back To Sign In</button>
+            <button class="btn btn-primary" type="button" data-auth-switch="signin">Back To Sign In</button>
           </div>
         </div>
       </section>
@@ -304,7 +308,7 @@ function buildAuthMarkup(mode, status) {
           </form>
           <div class="auth-footer">
             Already registered?
-            <button class="auth-switch" data-auth-switch="signin">Sign In</button>
+            <button class="auth-switch" type="button" data-auth-switch="signin">Sign In</button>
           </div>
         </div>
       </section>
@@ -339,7 +343,7 @@ function buildAuthMarkup(mode, status) {
         </form>
         <div class="auth-footer">
           New user?
-          <button class="auth-switch" data-auth-switch="register">Register</button>
+          <button class="auth-switch" type="button" data-auth-switch="register">Register</button>
           <div class="auth-help">Accounts are stored in local storage in this browser, which is fine for a demo but not for real production security.</div>
         </div>
       </div>
@@ -453,12 +457,17 @@ function handleSignInSubmit(event) {
   }
 
   const user = getStoredUsers().find((entry) => {
-    return normalizeValue(entry.username) === normalizeValue(username)
-      && normalizeValue(entry.email) === normalizeValue(email)
+    const usernameMatches = normalizeValue(entry.username) === normalizeValue(username);
+    const emailMatches = normalizeValue(entry.email) === normalizeValue(email);
+    return emailMatches && usernameMatches && entry.password === password;
+  });
+
+  const fallbackUser = user || getStoredUsers().find((entry) => {
+    return normalizeValue(entry.email) === normalizeValue(email)
       && entry.password === password;
   });
 
-  if (!user) {
+  if (!fallbackUser) {
     renderAuthPage('signin', {
       type: 'error',
       title: 'Sign-in failed.',
@@ -467,11 +476,11 @@ function handleSignInSubmit(event) {
     return;
   }
 
-  currentUser = user;
-  saveStoredSession(user);
+  currentUser = fallbackUser;
+  saveStoredSession(fallbackUser);
   ensurePresentationData();
   updateSidebarUser();
-  showToast(`Welcome back, ${user.name}!`, 'success');
+  showToast(`Welcome back, ${fallbackUser.name}!`, 'success');
   navigateTo('dashboard', false);
 }
 
