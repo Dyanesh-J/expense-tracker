@@ -88,7 +88,9 @@ async function init() {
   initializeSidebarCalendar();
   bindShellEvents();
 
-  currentUser = null;
+  currentUser = getStoredUsers().find((user) => normalizeValue(user.email) === normalizeValue(DEMO_USER.email)) || DEMO_USER;
+  saveStoredSession(currentUser);
+  ensurePresentationData();
   updateSidebarUser();
 
   setTimeout(() => {
@@ -146,11 +148,6 @@ function bindShellEvents() {
 
 function routeFromHash(animate = false) {
   const hash = location.hash.replace('#', '').trim();
-
-  if (!currentUser) {
-    renderAuthPage(hash === 'register' ? 'register' : 'signin');
-    return;
-  }
 
   if (AUTH_HASHES.has(hash)) {
     navigateTo('dashboard', animate);
@@ -492,15 +489,8 @@ function handleSignInSubmit(event) {
 }
 
 function signOut() {
-  clearStoredSession();
-  currentUser = null;
-  updateSidebarUser();
-  showToast('Signed out successfully.', 'info');
-  renderAuthPage('signin', {
-    type: 'success',
-    title: 'You are signed out.',
-    message: 'Sign in again whenever you want to continue.'
-  });
+  showToast('Presentation mode is active.', 'info');
+  navigateTo('dashboard', false);
 }
 
 function updateSidebarMonth() {
@@ -519,6 +509,7 @@ function updateSidebarUser() {
   sidebarUser?.classList.remove('hidden');
   sidebarUserName.textContent = currentUser.name || currentUser.username;
   sidebarUserEmail.textContent = currentUser.email;
+  logoutBtn?.classList.add('hidden');
 }
 
 function ensureDefaultUser() {
