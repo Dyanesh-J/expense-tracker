@@ -141,7 +141,7 @@ function buildPresentationSeed() {
     budgets: {
       [formatMonth(twoMonthsAgo)]: 18000,
       [formatMonth(previousMonth)]: 22000,
-      [formatMonth(currentMonth)]: 24000
+      [formatMonth(currentMonth)]: 18500
     },
     expenses: [
       { date: formatDate(addDays(twoMonthsAgo, 1)), category: 'Food', amount: 420, note: 'Breakfast and groceries' },

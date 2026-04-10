@@ -11,7 +11,7 @@
 </head>
 <body>
   <!-- Loading Screen -->
-  <div id="global-loader" class="global-loader">
+  <div id="global-loader" class="global-loader hidden">
     <div class="loader-content">
       <div class="loader-logo">
         <span class="logo-icon">◈</span>
@@ -29,7 +29,7 @@
   <div id="page-transition" class="page-transition"></div>
 
   <!-- App Shell -->
-  <div id="app" class="app hidden">
+  <div id="app" class="app">
     <!-- Sidebar -->
     <aside id="sidebar" class="sidebar">
       <div class="sidebar-header">
@@ -96,17 +96,6 @@
       </nav>
 
       <div class="sidebar-footer">
-        <div class="sidebar-calendar" id="sidebar-calendar">
-          <div class="sidebar-calendar-head">Calendar Filter</div>
-          <div class="sidebar-calendar-grid">
-            <select class="form-control sidebar-calendar-select" id="sidebar-calendar-month"></select>
-            <select class="form-control sidebar-calendar-select" id="sidebar-calendar-year"></select>
-          </div>
-          <div class="sidebar-calendar-date-wrap">
-            <label class="sidebar-calendar-label" for="sidebar-calendar-day">Date</label>
-            <input class="form-control sidebar-calendar-day" id="sidebar-calendar-day" type="number" min="1" max="31" />
-          </div>
-        </div>
         <div class="wasm-badge" id="wasm-badge">
           <span class="wasm-dot"></span>
           <span class="wasm-label">JS Mode</span>
