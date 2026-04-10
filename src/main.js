@@ -75,14 +75,6 @@ async function init() {
     }
   }, 500);
 
-  const wasmLoaded = await initWASM();
-  clearInterval(messageInterval);
-
-  if (wasmLoaded) {
-    wasmBadge.classList.add('active');
-    wasmBadge.querySelector('.wasm-label').textContent = 'WASM Active';
-  }
-
   ensureDefaultUser();
   updateSidebarMonth();
   initializeSidebarCalendar();
@@ -93,12 +85,29 @@ async function init() {
   ensurePresentationData();
   updateSidebarUser();
 
-  setTimeout(() => {
+  const finishBoot = () => {
+    clearInterval(messageInterval);
+    if (statusEl) {
+      statusEl.textContent = 'Ready to launch!';
+    }
     loader?.classList.add('hidden');
     app.classList.remove('hidden');
     gsap.from(app, { opacity: 0, duration: 0.6, ease: 'power2.out' });
     routeFromHash(false);
-  }, 200);
+  };
+
+  setTimeout(finishBoot, 900);
+
+  initWASM()
+    .then((wasmLoaded) => {
+      if (wasmLoaded) {
+        wasmBadge.classList.add('active');
+        wasmBadge.querySelector('.wasm-label').textContent = 'WASM Active';
+      }
+    })
+    .catch((error) => {
+      console.error('WASM startup failed:', error);
+    });
 }
 
 function bindShellEvents() {
