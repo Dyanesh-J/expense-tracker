@@ -15,6 +15,13 @@ const STORAGE_SESSION_KEY = 'mmc_current_user';
 const STORAGE_SELECTED_DATE_KEY = 'mmc_selected_date';
 const AUTH_HASHES = new Set(['signin', 'register']);
 const MONTH_NAMES = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+const DEMO_USER = {
+  name: 'Demo Presenter',
+  username: 'demo',
+  email: 'demo@moneycoach.app',
+  password: 'demo123',
+  createdAt: '2026-01-01T00:00:00.000Z'
+};
 
 let currentPage = 'dashboard';
 let isTransitioning = false;
@@ -76,6 +83,7 @@ async function init() {
     wasmBadge.querySelector('.wasm-label').textContent = 'WASM Active';
   }
 
+  ensureDefaultUser();
   updateSidebarMonth();
   initializeSidebarCalendar();
   bindShellEvents();
@@ -325,16 +333,16 @@ function buildAuthMarkup(mode, status) {
           <div class="form-row">
             <div class="form-group">
               <label class="form-label" for="signin-username">Username</label>
-              <input class="form-control" id="signin-username" name="username" placeholder="Your username" required />
+              <input class="form-control" id="signin-username" name="username" placeholder="Your username" value="${getStoredUsers().length === 1 ? DEMO_USER.username : ''}" required />
             </div>
             <div class="form-group">
               <label class="form-label" for="signin-email">Email Id</label>
-              <input class="form-control" id="signin-email" name="email" type="email" placeholder="name@example.com" required />
+              <input class="form-control" id="signin-email" name="email" type="email" placeholder="name@example.com" value="${getStoredUsers().length === 1 ? DEMO_USER.email : ''}" required />
             </div>
           </div>
           <div class="form-group">
             <label class="form-label" for="signin-password">Password</label>
-            <input class="form-control" id="signin-password" name="password" type="password" placeholder="Enter your password" required />
+            <input class="form-control" id="signin-password" name="password" type="password" placeholder="Enter your password" value="${getStoredUsers().length === 1 ? DEMO_USER.password : ''}" required />
           </div>
           <div class="auth-actions">
             <button class="btn btn-primary" type="submit">Sign In</button>
@@ -343,7 +351,7 @@ function buildAuthMarkup(mode, status) {
         <div class="auth-footer">
           New user?
           <button class="auth-switch" type="button" data-auth-switch="register">Register</button>
-          <div class="auth-help">Accounts are stored in local storage in this browser, which is fine for a demo but not for real production security.</div>
+          <div class="auth-help">Accounts are stored in local storage in this browser. Demo account: username <strong>demo</strong>, email <strong>demo@moneycoach.app</strong>, password <strong>demo123</strong>.</div>
         </div>
       </div>
     </section>
@@ -511,6 +519,14 @@ function updateSidebarUser() {
   sidebarUser?.classList.remove('hidden');
   sidebarUserName.textContent = currentUser.name || currentUser.username;
   sidebarUserEmail.textContent = currentUser.email;
+}
+
+function ensureDefaultUser() {
+  const users = getStoredUsers();
+  const demoExists = users.some((user) => normalizeValue(user.email) === normalizeValue(DEMO_USER.email));
+  if (demoExists) return;
+  users.push({ ...DEMO_USER });
+  saveStoredUsers(users);
 }
 
 function ensurePresentationData() {
