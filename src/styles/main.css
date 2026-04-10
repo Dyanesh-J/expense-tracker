@@ -61,13 +61,15 @@ input, select, textarea { font-family: var(--font-body); }
 .global-loader {
   position: fixed; inset: 0;
   background: var(--bg-0);
-  display: none !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   z-index: 9999;
   transition: opacity 0.6s ease, visibility 0.6s ease;
 }
 
 .global-loader.hidden {
-  opacity: 1; visibility: visible;
+  opacity: 0; visibility: hidden;
   pointer-events: none;
 }
 

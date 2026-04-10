@@ -80,8 +80,7 @@ async function init() {
   initializeSidebarCalendar();
   bindShellEvents();
 
-  currentUser = getStoredSession();
-  ensurePresentationData();
+  currentUser = null;
   updateSidebarUser();
 
   setTimeout(() => {
