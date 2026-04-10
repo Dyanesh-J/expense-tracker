@@ -5,23 +5,33 @@
 let wasmModule = null;
 let wasmReady = false;
 let wasmCallbacks = [];
+const WASM_INIT_TIMEOUT_MS = 5000;
+
+function withTimeout(promise, timeoutMs, message) {
+  return Promise.race([
+    promise,
+    new Promise((_, reject) => {
+      setTimeout(() => reject(new Error(message)), timeoutMs);
+    })
+  ]);
+}
 
 // ── Try to load WASM ──────────────────────────────────────────────────────────
 export async function initWASM() {
   try {
     // ✅ MUST BE BEFORE loading script
     window.Module = {
-      locateFile: (path) => `/wasm/${path}`
+      locateFile: (path) => `${(import.meta.env.BASE_URL || '/').endsWith('/') ? (import.meta.env.BASE_URL || '/') : `${import.meta.env.BASE_URL || '/'}/`}wasm/${path}`
     };
 
     // Load script manually
-    await new Promise((resolve, reject) => {
+    await withTimeout(new Promise((resolve, reject) => {
       const script = document.createElement('script');
-      script.src = '/wasm/tracker.js';
+      script.src = `${(import.meta.env.BASE_URL || '/').endsWith('/') ? (import.meta.env.BASE_URL || '/') : `${import.meta.env.BASE_URL || '/'}/`}wasm/tracker.js`;
       script.onload = resolve;
       script.onerror = reject;
       document.head.appendChild(script);
-    });
+    }), WASM_INIT_TIMEOUT_MS, 'WASM loader script timed out');
 
     // ✅ IMPORTANT FIX HERE
     if (typeof window.Module !== 'object') {
@@ -31,13 +41,13 @@ export async function initWASM() {
     wasmModule = window.Module;
 
     // Wait for runtime ready (VERY IMPORTANT)
-    await new Promise((resolve) => {
+    await withTimeout(new Promise((resolve) => {
       if (wasmModule.calledRun) {
         resolve();
       } else {
         wasmModule.onRuntimeInitialized = resolve;
       }
-    });
+    }), WASM_INIT_TIMEOUT_MS, 'WASM runtime initialization timed out');
 
     wasmModule._init_manager();
 
