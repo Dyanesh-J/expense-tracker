@@ -136,18 +136,25 @@ function loadSettings(container) {
   container.querySelector('#user-name').value = name;
   container.querySelector('#currency-select').value = currency;
 
-  const wasmActive = document.querySelector('.wasm-badge')?.classList.contains('active');
-  container.querySelector('#wasm-status-desc').textContent = wasmActive
-    ? 'Running C++ compiled code via Emscripten'
-    : 'WASM not loaded. Using JavaScript fallback (localStorage)';
+  const badge = document.querySelector('.wasm-badge');
+  const badgeLabel = badge?.querySelector('.wasm-label')?.textContent?.trim() || '';
+  const demoReady = badgeLabel === 'Demo Ready';
+  const wasmActive = badge?.classList.contains('active') && !demoReady;
+  container.querySelector('#wasm-status-desc').textContent = demoReady
+    ? 'Presentation mode is enabled with seeded demo data for storytelling'
+    : wasmActive
+      ? 'Running C++ compiled code via Emscripten'
+      : 'WASM not loaded. Using JavaScript fallback (localStorage)';
   container.querySelector('#wasm-status-badge').innerHTML = `
-    <span class="stat-badge ${wasmActive ? 'green' : 'orange'}">
-      ${wasmActive ? 'WASM Active' : 'JS Fallback'}
+    <span class="stat-badge ${demoReady || wasmActive ? 'green' : 'orange'}">
+      ${demoReady ? 'Demo Ready' : wasmActive ? 'WASM Active' : 'JS Fallback'}
     </span>
   `;
 
   if (wasmActive) {
     container.querySelector('#storage-mode-badge').textContent = 'File System (C++)';
+  } else if (demoReady) {
+    container.querySelector('#storage-mode-badge').textContent = 'Seeded Demo';
   }
 
   const total = tracker.getAllExpenses().length;
